@@ -10,7 +10,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-DBManager dbm = new("db2.sqlite3");
+#if DEBUG
+DBManager dbm = new(":memory:");
+DBPreparation.PrepareInMemoryDb(dbm);
+#else
+DBManager dbm = new(PathHelper.GetFilesDirectory("db2.sqlite3"));
+#endif
 
 var app = builder.Build();
 
@@ -25,10 +30,19 @@ app.MapPost("/", (Roster roster) =>
         dbm.AddRoster(roster);
         return Results.Created($"/roster/{roster.Playerid}", roster);
     }
+    catch (Microsoft.Data.Sqlite.SqliteException ex)
+    {
+        Console.WriteLine(ex.Message);
+        return ex.ErrorCode switch
+        {
+            19 => Results.Conflict("Tried to put the same data"),
+            _ => Results.Problem("Something unknown happend with database"),
+        };
+    }
     catch (Exception ex)
     {
-        Console.WriteLine(ex);
-        return Results.Problem(".");
+        Console.WriteLine(ex.Message);
+        return Results.Problem("Something unknown happend or you tried to add roster with uncompatable stats");
     }
 });
 

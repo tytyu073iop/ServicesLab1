@@ -20,36 +20,27 @@ public class DBManagerTest
         Assert.Equal(result, arr);
     }
 
-    private static void CreateRosterTable(DBManager dbm)
-    {
-        var command = dbm.connection.CreateCommand();
-        command.CommandText = """
-        CREATE TABLE roster (
-    playerid VARCHAR(10) PRIMARY KEY,
-    jersey INTEGER NOT NULL,
-    fname VARCHAR(50) NOT NULL,
-    sname VARCHAR(50) NOT NULL,
-    position VARCHAR(5) NOT NULL,
-    birthday DATETIME NOT NULL,
-    weight INTEGER NOT NULL,
-    height INTEGER NOT NULL,
-    birthcity VARCHAR(50) NOT NULL,
-    birthstate VARCHAR(5) NOT NULL
-)
-""";
 
-        command.ExecuteNonQuery();
-    }
 
     [Fact]
     public void TestAddition()
     {
         DBManager dbm = new(":memory:");
-        CreateRosterTable(dbm);
+        DBPreparation.PrepareInMemoryDb(dbm);
         Roster test = new("adamlem", 12, "Mike", "Adamle", "RW", "2001-09-21 00:00:00", 90, 197, "Stamford", "CT");
 
         dbm.AddRoster(test);
 
         Assert.Equal([test], dbm.GetAllRosters());
+    }
+
+    [Fact]
+    public void TestAdditionFalure()
+    {
+        DBManager dbm = new(":memory:");
+        DBPreparation.PrepareInMemoryDb(dbm);
+        Roster test = new("adamlem", 12, "Mike", "Adamle", "RW", "2001-09-21 00:00:00", 70, 197, "Stamford", "CT");
+
+        Assert.Throws<Exception>(() => dbm.AddRoster(test));
     }
 }

@@ -3,7 +3,7 @@
     int Jersey,
     string Fname,
     string Sname,
-    string Postition,
+    string Position,
     string Birthday,
     int Weight,
     int Height,

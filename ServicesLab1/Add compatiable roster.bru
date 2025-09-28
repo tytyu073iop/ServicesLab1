@@ -1,0 +1,30 @@
+meta {
+  name: Add compatiable roster
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5268/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "playerid": "adamlem",
+    "jersy": 12,
+    "fname": "Mike",
+    "sname": "Adamle",
+    "position": "RW",
+    "birthday": "2001-09-21",
+    "weight": "90",
+    "height": "197",
+    "birthcity": "Stamford",
+    "birthstate": "CT"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
