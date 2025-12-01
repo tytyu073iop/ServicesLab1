@@ -1,46 +1,55 @@
 ﻿using Xunit.Sdk;
+using ServiceReference1;
+using System.Threading.Tasks;
 
 namespace TestBackend;
 
+// WARNING: works only when dbdriver is on
 public class DBManagerTest
 {
 
     [Fact]
-    public void TestGettingAll()
+    public async Task TestGettingAll()
     {
 
-        DBManager dbm = new(PathHelper.GetFilesDirectory("test.sqlite3"));
-        List<Roster> arr = [
-            new Roster("adamlem", 12, "Mike", "Adamle", "RW", "2001-09-21 00:00:00", 73, 197, "Stamford", "CT"),
-            new Roster("adamles", 17, "Scott", "Adamle", "D", "1999-03-01 00:00:00", 70, 184, "Columbus", "OH")
-            ];
+        DBManager dbm = new();
 
-        List<Roster> result = dbm.GetAllRosters();
+        Roster[] result = await dbm.GetAllRosters();
 
-        Assert.Equal(result, arr);
+        Assert.Equal([], result);
     }
 
 
 
     [Fact]
-    public void TestAddition()
+    public async Task TestAddition()
     {
-        DBManager dbm = new(":memory:");
-        DBPreparation.PrepareInMemoryDb(dbm);
-        Roster test = new("adamlem", 12, "Mike", "Adamle", "RW", "2001-09-21 00:00:00", 90, 197, "Stamford", "CT");
+        DBManager dbm = new();
+        Roster test = new()
+        {
+            Playerid = "adamlem",
+            Jersey = 12,
+            Fname = "Mike",
+            Sname = "Adamle",
+            Position = "RW",
+            Birthday = "2001-09-21 00:00:00",
+            Height = 90,
+            Weight = 197,
+            Birthcity = "Stamford",
+            Birthstate = "CT"
+        };
 
-        dbm.AddRoster(test);
+        await dbm.AddRoster(test);
 
-        Assert.Equal([test], dbm.GetAllRosters());
+        Assert.Equal([test], await dbm.GetAllRosters());
     }
 
     [Fact]
-    public void TestAdditionFalure()
+    public async Task TestAdditionFalure()
     {
-        DBManager dbm = new(":memory:");
-        DBPreparation.PrepareInMemoryDb(dbm);
-        Roster test = new("adamlem", 12, "Mike", "Adamle", "RW", "2001-09-21 00:00:00", 70, 197, "Stamford", "CT");
+        DBManager dbm = new();
+        Roster test = new() { Playerid = "adamlem", Jersey = 12, Fname = "Mike", Sname = "Adamle", Position = "RW", Birthday = "2001-09-21 00:00:00", Height = 197, Weight = 70, Birthcity = "Stamford", Birthstate = "CT" };
 
-        Assert.Throws<Exception>(() => dbm.AddRoster(test));
+        await Assert.ThrowsAsync<Exception>(async () => await dbm.AddRoster(test));
     }
 }

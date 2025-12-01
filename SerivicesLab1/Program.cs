@@ -1,3 +1,5 @@
+using ServiceReference1;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -10,12 +12,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-#if DEBUG
-DBManager dbm = new(":memory:");
-DBPreparation.PrepareInMemoryDb(dbm);
-#else
-DBManager dbm = new(PathHelper.GetFilesDirectory("db2.sqlite3"));
-#endif
+DBManager dbm = new();
 
 var app = builder.Build();
 
@@ -23,11 +20,11 @@ app.UseCors("AllowFrontend");
 
 app.MapGet("/", () => dbm.GetAllRosters());
 
-app.MapPost("/", (Roster roster) =>
+app.MapPost("/", async (Roster roster) =>
 {
     try
     {
-        dbm.AddRoster(roster);
+        await dbm.AddRoster(roster);
         return Results.Created($"/roster/{roster.Playerid}", roster);
     }
     catch (Microsoft.Data.Sqlite.SqliteException ex)
